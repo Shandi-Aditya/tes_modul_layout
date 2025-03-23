@@ -107,7 +107,7 @@ class _LoginContent extends StatelessWidget {
         _ActionButtons(),
         SizedBox(height: 40),
         Text(
-          'Hak Cipta ©2022 oleh Undiksha',
+          'Hak Cipta ©2025 oleh Shandi-Undiksha',
           style: LoginScreen._copyrightStyle,
         ),
       ],
