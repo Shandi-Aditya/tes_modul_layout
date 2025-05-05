@@ -1,10 +1,36 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'profile_screen.dart';
+import 'cek_saldo_screen.dart';
+import 'transfer_screen.dart';
+import 'deposito_screen.dart';
+import 'pembayaran_screen.dart';
+import 'pinjaman_screen.dart';
+import 'mutasi_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static const Color primaryColor = Color(0xFF1A237E);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  double saldo = 2500000.0; // Saldo awal
+  List<Map<String, dynamic>> mutasi = [];
+
+  void updateSaldo(double jumlah, String keterangan) {
+    setState(() {
+      saldo += jumlah;
+      mutasi.insert(0, {
+        'tanggal': DateTime.now().toString().substring(0, 16),
+        'keterangan': keterangan,
+        'jumlah': jumlah,
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +46,7 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: primaryColor,
+        backgroundColor: HomeScreen.primaryColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
@@ -81,7 +107,7 @@ class HomeScreen extends StatelessWidget {
               shape: BoxShape.circle,
               color: Colors.white,
               border: Border.all(
-                color: primaryColor,
+                color: HomeScreen.primaryColor,
                 width: 2,
               ),
             ),
@@ -93,27 +119,27 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Nasabah',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey,
                   ),
                 ),
-                Text(
+                const Text(
                   'Shandi Arif Aditya',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: primaryColor,
+                    color: HomeScreen.primaryColor,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Total Saldo Anda',
                   style: TextStyle(
                     fontSize: 12,
@@ -121,11 +147,11 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp 2.500.000',
-                  style: TextStyle(
+                  'Rp ${saldo.toStringAsFixed(0)}',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: primaryColor,
+                    color: HomeScreen.primaryColor,
                   ),
                 ),
               ],
@@ -143,13 +169,89 @@ class HomeScreen extends StatelessWidget {
       crossAxisCount: 3,
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
-      children: const [
-        MenuItemWidget(icon: Icons.account_balance_wallet, label: 'Cek Saldo'),
-        MenuItemWidget(icon: Icons.swap_horiz, label: 'Transfer'),
-        MenuItemWidget(icon: Icons.savings, label: 'Deposito'),
-        MenuItemWidget(icon: Icons.payment, label: 'Pembayaran'),
-        MenuItemWidget(icon: Icons.monetization_on, label: 'Pinjaman'),
-        MenuItemWidget(icon: Icons.trending_up, label: 'Mutasi'),
+      children: [
+        MenuItemWidget(
+          icon: Icons.account_balance_wallet,
+          label: 'Cek Saldo',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CekSaldoScreen(saldo: saldo),
+              ),
+            );
+          },
+        ),
+        MenuItemWidget(
+          icon: Icons.swap_horiz,
+          label: 'Transfer',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TransferScreen(
+                  saldo: saldo,
+                  onTransfer: (jumlah) => updateSaldo(jumlah, 'Transfer'),
+                ),
+              ),
+            );
+          },
+        ),
+        MenuItemWidget(
+          icon: Icons.savings,
+          label: 'Deposito',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DepositoScreen(
+                  onDeposit: (jumlah) => updateSaldo(jumlah, 'Deposito'),
+                ),
+              ),
+            );
+          },
+        ),
+        MenuItemWidget(
+          icon: Icons.payment,
+          label: 'Pembayaran',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PembayaranScreen(
+                  onPay: (jumlah, ket) => updateSaldo(-jumlah, 'Pembayaran: $ket'),
+                  saldo: saldo,
+                ),
+              ),
+            );
+          },
+        ),
+        MenuItemWidget(
+          icon: Icons.monetization_on,
+          label: 'Pinjaman',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PinjamanScreen(
+                  onPinjam: (jumlah, lama) => updateSaldo(jumlah, 'Pinjaman $lama bulan'),
+                ),
+              ),
+            );
+          },
+        ),
+        MenuItemWidget(
+          icon: Icons.trending_up,
+          label: 'Mutasi',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MutasiScreen(mutasi: mutasi),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -173,7 +275,7 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Butuh Bantuan?',
+            'Butuh Bantuan???',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -187,11 +289,11 @@ class HomeScreen extends StatelessWidget {
                 '0878-1234-1024',
                 style: TextStyle(
                   fontSize: 28,
-                  color: primaryColor,
+                  color: HomeScreen.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Icon(Icons.phone, color: primaryColor, size: 40),
+              Icon(Icons.phone, color: HomeScreen.primaryColor, size: 40),
             ],
           ),
         ],
@@ -254,43 +356,48 @@ class HomeScreen extends StatelessWidget {
 class MenuItemWidget extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   const MenuItemWidget({
     super.key,
     required this.icon,
     required this.label,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 32, color: HomeScreen.primaryColor),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              color: HomeScreen.primaryColor,
-              fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A000000),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 2),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: HomeScreen.primaryColor),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: HomeScreen.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -339,20 +446,32 @@ class BottomMenuItem extends StatelessWidget {
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        iconWidget,
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: HomeScreen.primaryColor,
-            fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () {
+        if (icon == Icons.person) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfileScreen(),
+            ),
+          );
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          iconWidget,
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: HomeScreen.primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 } 
