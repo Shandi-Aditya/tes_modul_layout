@@ -17,36 +17,69 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  double saldo = 2500000.0; // Saldo awal
-  List<Map<String, dynamic>> mutasi = [];
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  double saldo = 1000000;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  final List<Map<String, dynamic>> mutasi = [
+    {'tanggal': '2025-04-20', 'jenis': 'Transfer', 'jumlah': -500000, 'keterangan': 'Transfer ke Dewa Satya'},
+    {'tanggal': '2025-04-19', 'jenis': 'Deposito', 'jumlah': 1000000, 'keterangan': 'Deposito 3 bulan'},
+    {'tanggal': '2025-04-18', 'jenis': 'Pembayaran', 'jumlah': -150000, 'keterangan': 'Pembayaran Listrik'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void updateSaldo(double jumlah, String keterangan) {
     setState(() {
       saldo += jumlah;
       mutasi.insert(0, {
-        'tanggal': DateTime.now().toString().substring(0, 16),
-        'keterangan': keterangan,
+        'tanggal': DateTime.now().toString().split(' ')[0],
+        'jenis': keterangan,
         'jumlah': jumlah,
+        'keterangan': keterangan,
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Koperasi Undiksha',
-          style: TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: HomeScreen.primaryColor,
+        backgroundColor: theme.colorScheme.primary,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
@@ -62,96 +95,108 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileCard(),
-              const SizedBox(height: 24),
-              _buildMenuGrid(),
-              const SizedBox(height: 24),
-              _buildHelpSection(),
-              const SizedBox(height: 24),
-              _buildBottomNavigation(),
-            ],
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildProfileCard(theme),
+                const SizedBox(height: 24),
+                _buildMenuGrid(theme),
+                const SizedBox(height: 24),
+                _buildHelpSection(theme),
+                const SizedBox(height: 24),
+                _buildBottomNavigation(theme),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8EAF6),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
+        color: Colors.white.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(
-                color: HomeScreen.primaryColor,
-                width: 2,
+          Hero(
+            tag: 'profile',
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/profile.png',
-                fit: BoxFit.cover,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/profile.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 24),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Nasabah',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[700],
                   ),
                 ),
-                const Text(
+                Text(
                   'Shandi Arif Aditya',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: HomeScreen.primaryColor,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
+                const SizedBox(height: 10),
+                Text(
                   'Total Saldo Anda',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[700],
                   ),
                 ),
                 Text(
                   'Rp ${saldo.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: HomeScreen.primaryColor,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ],
@@ -162,17 +207,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMenuGrid() {
+  Widget _buildMenuGrid(ThemeData theme) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
+      mainAxisSpacing: 20,
+      crossAxisSpacing: 20,
       children: [
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.account_balance_wallet,
           label: 'Cek Saldo',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -182,9 +228,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.swap_horiz,
           label: 'Transfer',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -197,9 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.savings,
           label: 'Deposito',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -211,9 +259,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.payment,
           label: 'Pembayaran',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -226,9 +275,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.monetization_on,
           label: 'Pinjaman',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -240,9 +290,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        MenuItemWidget(
+        _buildMenuItem(
           icon: Icons.trending_up,
           label: 'Mutasi',
+          theme: theme,
           onTap: () {
             Navigator.push(
               context,
@@ -256,44 +307,131 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHelpSection() {
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String label,
+    required ThemeData theme,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withOpacity(0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHelpSection(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
+        color: Colors.white.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Butuh Bantuan???',
-            style: TextStyle(
-              fontSize: 20,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '0878-1234-1024',
-                style: TextStyle(
-                  fontSize: 28,
-                  color: HomeScreen.primaryColor,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Icon(Icons.phone, color: HomeScreen.primaryColor, size: 40),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withOpacity(0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.phone,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
             ],
           ),
         ],
@@ -301,49 +439,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBottomNavigation() {
+  Widget _buildBottomNavigation(ThemeData theme) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
+        color: Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: const BottomMenuItem(
+            child: Center(
+              child: _buildBottomMenuItem(
                 icon: Icons.settings,
                 label: 'Pengaturan',
+                theme: theme,
+                onTap: () {},
               ),
             ),
           ),
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: const BottomMenuItem(
+            child: Center(
+              child: _buildBottomMenuItem(
                 icon: Icons.qr_code_scanner,
                 label: 'Kode QR',
+                theme: theme,
+                isQRCode: true,
+                onTap: () {},
               ),
             ),
           ),
           Expanded(
-            child: Container(
-              alignment: Alignment.center,
-              child: const BottomMenuItem(
+            child: Center(
+              child: _buildBottomMenuItem(
                 icon: Icons.person,
                 label: 'Profil',
+                theme: theme,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                      settings: RouteSettings(arguments: saldo),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -351,94 +500,35 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-class MenuItemWidget extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  const MenuItemWidget({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1A000000),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32, color: HomeScreen.primaryColor),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                color: HomeScreen.primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BottomMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const BottomMenuItem({
-    super.key,
-    required this.icon,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isQRCode = icon == Icons.qr_code_scanner;
-
+  Widget _buildBottomMenuItem({
+    required IconData icon,
+    required String label,
+    required ThemeData theme,
+    required VoidCallback onTap,
+    bool isQRCode = false,
+  }) {
     Widget iconWidget = Icon(
       icon,
       size: isQRCode ? 32 : 28,
-      color: isQRCode ? Colors.white : HomeScreen.primaryColor,
+      color: isQRCode ? Colors.white : theme.colorScheme.primary,
     );
 
     if (isQRCode) {
       iconWidget = Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: HomeScreen.primaryColor,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white,
-            width: 3,
+          gradient: LinearGradient(
+            colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+          shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 2),
+              color: theme.colorScheme.primary.withOpacity(0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -446,31 +536,28 @@ class BottomMenuItem extends StatelessWidget {
       );
     }
 
-    return InkWell(
-      onTap: () {
-        if (icon == Icons.person) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ProfileScreen(),
-            ),
-          );
-        }
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          iconWidget,
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: HomeScreen.primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              iconWidget,
+              const SizedBox(height: 10),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

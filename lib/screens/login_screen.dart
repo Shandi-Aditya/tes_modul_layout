@@ -7,76 +7,36 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
-  static const Color primaryColor = Color(0xFF1A237E);
-  
-  static const _inputBorder = BorderRadius.all(Radius.circular(10));
-  
-  static const _defaultBorder = OutlineInputBorder(
-    borderRadius: _inputBorder,
-    borderSide: BorderSide(color: primaryColor),
-  );
-  
-  static const _focusedBorder = OutlineInputBorder(
-    borderRadius: _inputBorder,
-    borderSide: BorderSide(
-      color: primaryColor,
-      width: 2,
-    ),
-  );
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+    _animationController.forward();
+  }
 
-  static const _buttonShape = RoundedRectangleBorder(
-    borderRadius: _inputBorder,
-  );
-
-  static const _buttonStyle = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-  );
-
-  static const _titleStyle = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
-
-  static const _copyrightStyle = TextStyle(
-    color: Colors.grey,
-    fontSize: 12,
-  );
-
-  static const _boldStyle = TextStyle(
-    fontWeight: FontWeight.bold,
-  );
-
-  static const _usernameDecoration = InputDecoration(
-    labelText: 'Nama Pengguna',
-    prefixIcon: Icon(Icons.person, color: primaryColor),
-    border: _defaultBorder,
-    focusedBorder: _focusedBorder,
-  );
-
-  static const _passwordDecoration = InputDecoration(
-    labelText: 'Kata Sandi',
-    prefixIcon: Icon(Icons.lock, color: primaryColor),
-    border: _defaultBorder,
-    focusedBorder: _focusedBorder,
-  );
-
-  static final _elevatedButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: primaryColor,
-    foregroundColor: Colors.white,
-    shape: _buttonShape,
-    elevation: 2,
-  );
-
-  static final _textButtonStyle = TextButton.styleFrom(
-    foregroundColor: primaryColor,
-  );
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void _handleLogin() {
     final username = _usernameController.text.trim();
@@ -103,136 +63,196 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
-                const _HeaderContainer(),
-                const SizedBox(height: 40),
-                const _LogoImage(),
-                const SizedBox(height: 50),
-                TextField(
-                  controller: _usernameController,
-                  decoration: _usernameDecoration,
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: _passwordDecoration,
-                ),
-                if (_errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  _buildHeaderContainer(theme),
+                  const SizedBox(height: 40),
+                  _buildLogoImage(),
+                  const SizedBox(height: 50),
+                  _buildInputFields(theme),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                          color: theme.colorScheme.error,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
+                  const SizedBox(height: 30),
+                  _buildLoginButton(theme),
+                  const SizedBox(height: 20),
+                  _buildActionButtons(theme),
+                  const SizedBox(height: 40),
+                  Text(
+                    'Hak Cipta ©2025 oleh Shandi-Undiksha',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
                   ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _handleLogin,
-                    style: _elevatedButtonStyle,
-                    child: const Text('Masuk', style: _buttonStyle),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _ActionButtons(),
-                const SizedBox(height: 40),
-                const Text(
-                  'Hak Cipta ©2025 oleh Shandi-Undiksha',
-                  style: _copyrightStyle,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-}
 
-class _HeaderContainer extends StatelessWidget {
-  const _HeaderContainer();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHeaderContainer(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: const BoxDecoration(
-        color: _LoginScreenState.primaryColor,
-        borderRadius: _LoginScreenState._inputBorder,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.secondary,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: const Text(
+      child: Text(
         'Koperasi Undiksha',
-        style: _LoginScreenState._titleStyle,
+        style: theme.textTheme.displaySmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
-}
 
-class _LogoImage extends StatelessWidget {
-  const _LogoImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Image(
-      image: AssetImage('assets/images/logo.png'),
-      height: 150,
-      width: 150,
-      fit: BoxFit.contain,
+  Widget _buildLogoImage() {
+    return Hero(
+      tag: 'logo',
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Image(
+          image: AssetImage('assets/images/logo.png'),
+          height: 120,
+          width: 120,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
-}
 
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildInputFields(ThemeData theme) {
+    return Column(
       children: [
-        _ActionButton(text: 'Daftar M-Banking'),
-        _ActionButton(text: 'Lupa Kata Sandi?'),
+        TextField(
+          controller: _usernameController,
+          decoration: InputDecoration(
+            labelText: 'Nama Pengguna',
+            prefixIcon: Icon(Icons.person, color: theme.colorScheme.primary),
+            hintText: 'Masukkan nama pengguna Anda',
+          ),
+        ),
+        const SizedBox(height: 20),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          decoration: InputDecoration(
+            labelText: 'Kata Sandi',
+            prefixIcon: Icon(Icons.lock, color: theme.colorScheme.primary),
+            hintText: 'Masukkan kata sandi Anda',
+          ),
+        ),
       ],
     );
   }
-}
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.text,
-  });
+  Widget _buildLoginButton(ThemeData theme) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: _handleLogin,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Masuk',
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
 
-  final String text;
+  Widget _buildActionButtons(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildActionButton(
+          'Daftar M-Banking',
+          theme,
+          onTap: () {},
+        ),
+        _buildActionButton(
+          'Lupa Kata Sandi?',
+          theme,
+          onTap: () {},
+        ),
+      ],
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildActionButton(String text, ThemeData theme, {required VoidCallback onTap}) {
     return TextButton(
-      onPressed: () {},
-      style: _LoginScreenState._textButtonStyle,
-      child: Text(text, style: _LoginScreenState._boldStyle),
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: theme.colorScheme.primary,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 } 

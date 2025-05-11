@@ -15,10 +15,12 @@ class DepositoScreen extends StatefulWidget {
 class _DepositoScreenState extends State<DepositoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _tokenController = TextEditingController();
 
   @override
   void dispose() {
     _amountController.dispose();
+    _tokenController.dispose();
     super.dispose();
   }
 
@@ -77,6 +79,22 @@ class _DepositoScreenState extends State<DepositoScreen> {
                   }
                   if (double.parse(value) < 1000000) {
                     return 'Minimal deposito Rp 1.000.000';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _tokenController,
+                decoration: const InputDecoration(
+                  labelText: 'Token',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.vpn_key),
+                  hintText: 'Masukkan token keamanan',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Token wajib diisi';
                   }
                   return null;
                 },
