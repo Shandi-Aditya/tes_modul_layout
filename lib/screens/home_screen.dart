@@ -7,6 +7,7 @@ import 'deposito_screen.dart';
 import 'pembayaran_screen.dart';
 import 'pinjaman_screen.dart';
 import 'mutasi_screen.dart';
+import 'qris_payment_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -474,7 +475,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 label: 'Kode QR',
                 theme: theme,
                 isQRCode: true,
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/qr-scanner');
+                },
               ),
             ),
           ),
