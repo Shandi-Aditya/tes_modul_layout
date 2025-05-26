@@ -35,10 +35,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^6.1.0
   qr_flutter: ^4.1.0  # For generating QR codes
-  mobile_scanner: ^3.5.6  # For scanning QR codes
+  mobile_scanner: ^7.0.0  # For scanning QR codes
   flutter_bloc: ^8.1.3  # For state management
   equatable: ^2.0.5  # For value comparison
-  image_picker_web: ^3.1.1
+  image_picker: ^1.0.4
   universal_html: ^2.2.4
 
 dev_dependencies:

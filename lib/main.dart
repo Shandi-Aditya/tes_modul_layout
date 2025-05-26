@@ -6,6 +6,9 @@ import 'screens/home_screen.dart';
 import 'screens/qris_payment_screen.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'cubits/qris_payment_cubit.dart';
+import 'package:image_picker/image_picker.dart';
+
+
 
 void main() {
   runApp(const MyApp());
