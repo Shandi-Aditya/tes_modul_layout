@@ -40,6 +40,7 @@ dependencies:
   equatable: ^2.0.5  # For value comparison
   image_picker: ^1.0.4
   universal_html: ^2.2.4
+  firebase_core: ^3.13.1
 
 dev_dependencies:
   flutter_test:

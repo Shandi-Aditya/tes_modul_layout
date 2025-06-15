@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "673637170831",
+    "project_id": "koperasiundiksha-shandi",
+    "storage_bucket": "koperasiundiksha-shandi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:673637170831:android:6a9086552db2441080fafa",
+        "android_client_info": {
+          "package_name": "com.belajar.modul_layout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeCkhHh1TICHAUGrGNrw0IJz12N-kENkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

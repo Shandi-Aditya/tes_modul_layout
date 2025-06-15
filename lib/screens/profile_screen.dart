@@ -55,9 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // Ambil saldo dari argumen jika ada, fallback ke saldo lokal
-    final double saldoHome = ModalRoute.of(context)?.settings.arguments is double
-        ? ModalRoute.of(context)!.settings.arguments as double
-        : saldo;
+    final jumlah = ModalRoute.of(context)!.settings.arguments;
+    final jumlahDouble = (jumlah as num).toDouble();
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
@@ -160,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           Text(
-                            'Rp ${saldoHome.toStringAsFixed(0)}',
+                            'Rp ${jumlahDouble.toStringAsFixed(0)}',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w900,
                               color: theme.colorScheme.primary,

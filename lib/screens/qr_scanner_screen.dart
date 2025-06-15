@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'dart:html' as html;
 import 'dart:convert';
-import 'package:image_picker_web/image_picker_web.dart';
-import 'package:universal_html/html.dart' as universal_html;
+import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 
 class QRScannerScreen extends StatefulWidget {
@@ -21,6 +19,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   bool isFrontCamera = false;
   Uint8List? _selectedImageBytes;
   bool _isProcessing = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -41,10 +40,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final media = await ImagePickerWeb.getImageAsBytes();
-      if (media != null) {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        final bytes = await image.readAsBytes();
         setState(() {
-          _selectedImageBytes = media;
+          _selectedImageBytes = bytes;
           _isProcessing = true;
         });
 

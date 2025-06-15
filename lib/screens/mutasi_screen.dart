@@ -19,7 +19,7 @@ class MutasiScreen extends StatelessWidget {
               itemCount: mutasi.length,
               itemBuilder: (context, index) {
                 final item = mutasi[index];
-                final isMinus = (item['jumlah'] as double) < 0;
+                final isMinus = (item['jumlah'] as num).toDouble() < 0;
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
